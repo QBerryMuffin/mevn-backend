@@ -24,7 +24,7 @@ app.use(morgan('dev'))
 app.use(bodyParser.json())
 app.use(cors())
 
-app.get('/CUCM', (reg, res) => {
+app.get('/org/', (req, res) => {
     const collection = client.db("test").collection("CUCM")
     
     collection.find().toArray(function (err, results){
@@ -34,10 +34,38 @@ app.get('/CUCM', (reg, res) => {
             return
         }
 
-        res.send(results)
+        res.send({code: 20000, data: results[0].orgs.default})
     })
 })
-app.post ('/addCUCM', (req, res) => {
+app.get('/org/:id', (req, res) => {
+    const collection = client.db("test").collection("CUCM")
+    let id = req.params.id
+    collection.find().toArray(function (err, results){
+        if (err) {
+            console.log(err)
+            res.send([])
+            return
+        }
+
+        res.send({code: 20000, data: results[0].orgs[id]})
+    })
+})
+
+app.get('/getOrgNames', (reg, res) => {
+    const collection = client.db("test").collection("CUCM")
+    
+    collection.find().toArray(function (err, results){
+        if (err) {
+            console.log(err)
+            res.send([])
+            return
+        }
+        let list = Object.keys(results[0].orgs)
+        res.send({code: 20000, data:{total: list.length, items: list}})
+    })
+})
+
+app.post ('/addOrg', (req, res) => {
     const collection = client.db("test").collection("CUCM")
     var todo = req.body.todo // parse the data from the request's body
     collection.insertOne({title: todo}, function (err, results){
@@ -46,7 +74,7 @@ app.post ('/addCUCM', (req, res) => {
             res.send('')
             return
         }
-        res.send(results.ops[0]) // returns the new document
+        res.send(results.orgs) // returns the new document
     })
 })
 
