@@ -3,11 +3,11 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const morgan = require('morgan')
 const mongo = require('mongodb')
+const { raw } = require('body-parser')
 const MongoClient = mongo.MongoClient
 const uri = 'mongodb+srv://test:test1234@testbug.rhc7n.mongodb.net/test'
-var client;
-
-var mongoClient = new MongoClient(uri, { reconnectTries : Number.MAX_VALUE, 
+var client
+const mongoClient = new MongoClient(uri, { reconnectTries : Number.MAX_VALUE, 
                                          autoReconnect : true,
                                          useNewUrlParser : true })
 mongoClient.connect((err, db) => {
@@ -26,55 +26,59 @@ app.use(cors())
 
 app.get('/org/', (req, res) => {
     const collection = client.db("test").collection("CUCM")
-    
-    collection.find().toArray(function (err, results){
+    const query = {"name": "default"}
+    collection.find(query).toArray(function (err, results){
         if (err) {
             console.log(err)
-            res.send([])
+            res.send({'code': 10000, "data": {"error": err}})
             return
         }
 
-        res.send({code: 20000, data: results[0].orgs.default})
+        res.send({code: 20000, data: results})
     })
 })
 app.get('/org/:id', (req, res) => {
     const collection = client.db("test").collection("CUCM")
     let id = req.params.id
-    collection.find().toArray(function (err, results){
+    const query = {"name": id}
+    collection.find(query).toArray(function (err, results){
         if (err) {
             console.log(err)
-            res.send([])
+            res.send({'code': 10000, "data": {"error": err}})
             return
         }
-
-        res.send({code: 20000, data: results[0].orgs[id]})
+        res.send({code: 20000, data: results[0]})
     })
 })
 
 app.get('/getOrgNames', (reg, res) => {
     const collection = client.db("test").collection("CUCM")
-    
-    collection.find().toArray(function (err, results){
+    const projection = {name: 1}
+    collection.find().project(projection).toArray(function (err, results){
         if (err) {
             console.log(err)
-            res.send([])
+            res.send({'code': 10000, "data": {"error": err}})
             return
         }
-        let list = Object.keys(results[0].orgs)
-        res.send({code: 20000, data:{total: list.length, items: list}})
+        const list = results.map(i => i.name)
+
+        res.send({code: 20000, data:{total: list.length, items: list }})
     })
 })
 
-app.post ('/addOrg', (req, res) => {
+app.post ('/saveOrg', (req, res) => {
     const collection = client.db("test").collection("CUCM")
-    var todo = req.body.todo // parse the data from the request's body
-    collection.insertOne({title: todo}, function (err, results){
+    const query = { name: req.body.name }
+    const updateDoc = {$set: req.body}
+      
+
+    collection.updateOne(query, updateDoc, function (err, results){
         if (err) {
             console.log(err)
-            res.send('')
+            res.send({'code': 10000, "data": {"error": err}})
             return
         }
-        res.send(results.orgs) // returns the new document
+        res.send({'code': 20000, "data": {"results": results}}) // returns the new document
     })
 })
 
