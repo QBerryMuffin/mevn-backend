@@ -47,6 +47,7 @@ app.get('/org/:id', (req, res) => {
             res.send({'code': 10000, "data": {"error": err}})
             return
         }
+        delete results[0]._id
         res.send({code: 20000, data: results[0]})
     })
 })
