@@ -3,7 +3,7 @@ const router = express.Router();
 
 const mongo = require('mongodb')
 const MongoClient = mongo.MongoClient
-const uri = "mongodb://home-test-mongo:3B21gdHSSxACQMhxsKeEX06XeWjNCQrI9JF0a8NR3AgcdeigU0WsDHm9cbIVUTeZenF1n7d6G8N1UhBLaAKzjg==@home-test-mongo.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&maxIdleTimeMS=120000&appName=@home-test-mongo@"
+const uri = process.env.DB_URI
 const mongoClient = new MongoClient(uri, { reconnectTries : Number.MAX_VALUE, 
                                          autoReconnect : true,
                                          useNewUrlParser : true })

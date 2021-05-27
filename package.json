@@ -4,9 +4,9 @@
   "name": "mevn-backend",
   "version": "1.0.0",
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "node ./server.js",
     "test": "echo 'no tests' && exit 0",
-    "dev": "node ./node_modules/nodemon/bin/nodemon.js ./bin/www.js"
+    "dev": "node -r dotenv/config ./node_modules/nodemon/bin/nodemon.js ./server.js"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -24,5 +24,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/QBerryMuffin/mevn-backend.git"
+  },
+  "devDependencies": {
+    "dotenv": "^10.0.0"
   }
 }
