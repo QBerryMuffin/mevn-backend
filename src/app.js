@@ -83,4 +83,4 @@ app.post ('/saveOrg', (req, res) => {
     })
 })
 
-app.listen(process.env.NODE_ENV.PORT || 8081)
+app.listen(process.env.NODE_PORT || 8081)
