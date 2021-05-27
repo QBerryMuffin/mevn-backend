@@ -1,75 +1,65 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const cors = require('cors')
-const morgan = require('morgan')
+const express = require('express');
+const router = express.Router();
+
 const mongo = require('mongodb')
-const helmet = require('helmet')
-const { raw } = require('body-parser')
 const MongoClient = mongo.MongoClient
 const uri = 'mongodb+srv://test:test1234@testbug.rhc7n.mongodb.net/test'
-var client
 const mongoClient = new MongoClient(uri, { reconnectTries : Number.MAX_VALUE, 
                                          autoReconnect : true,
                                          useNewUrlParser : true })
+
+var client = {}
 mongoClient.connect((err, db) => {
-    if (err != null) {
-        console.log(err)
-        return
-    }
-    client = db
+        if (err != null) {
+            console.log(err)
+        } else{
+             client = db
+        }
 })
 
-const app = express() // create your express app
-
-app.use(helmet())
-app.use(morgan('dev'))
-app.use(bodyParser.json())
-app.use(cors())
-
-app.get('/org/', (req, res) => {
+router.get('/', (req, res) => {
     const collection = client.db("test").collection("CUCM")
     const query = {"name": "default"}
     collection.find(query).toArray(function (err, results){
         if (err) {
             console.log(err)
-            res.send({'code': 10000, "data": {"error": err}})
-            return
+            res.json({'code': 10000, "data": {"error": err}})
+        } else {
+            res.json({"code": 20000, "data": results})
         }
-
-        res.send({code: 20000, data: results})
     })
 })
-app.get('/org/:id', (req, res) => {
+
+router.get('/byId/:id', (req, res) => {
     const collection = client.db("test").collection("CUCM")
     let id = req.params.id
     const query = {"name": id}
     collection.find(query).toArray(function (err, results){
         if (err) {
             console.log(err)
-            res.send({'code': 10000, "data": {"error": err}})
-            return
+            res.json({'code': 10000, "data": {"error": err}})
+        } else {
+            delete results[0]._id
+            res.json({"code": 20000, "data": results})
         }
-        delete results[0]._id
-        res.send({code: 20000, data: results[0]})
     })
 })
 
-app.get('/getOrgNames', (reg, res) => {
+router.get('/getNames', (reg, res) => {
     const collection = client.db("test").collection("CUCM")
     const projection = {name: 1}
     collection.find().project(projection).toArray(function (err, results){
         if (err) {
             console.log(err)
-            res.send({'code': 10000, "data": {"error": err}})
-            return
+            res.json({'code': 10000, "data": {"error": err}})
+        }else{
+            const list = results.map(i => i.name)
+            res.json({code: 20000, data:{total: list.length, items: list }})
+    
         }
-        const list = results.map(i => i.name)
-
-        res.send({code: 20000, data:{total: list.length, items: list }})
     })
 })
-
-app.post ('/saveOrg', (req, res) => {
+ router.post ('/saveOrg', (req, res) => {
     const collection = client.db("test").collection("CUCM")
     const query = { name: req.body.name }
     const updateDoc = {$set: req.body}
@@ -78,11 +68,13 @@ app.post ('/saveOrg', (req, res) => {
     collection.updateOne(query, updateDoc, function (err, results){
         if (err) {
             console.log(err)
-            res.send({'code': 10000, "data": {"error": err}})
-            return
+            res.json({'code': 10000, "data": {"error": err}})
+        } else{
+            res.json({'code': 20000, "data": {"results": results}}) // returns the new document
         }
-        res.send({'code': 20000, "data": {"results": results}}) // returns the new document
+        
     })
 })
 
-app.listen(process.env.NODE_PORT || 8081)
+
+module.exports = router
