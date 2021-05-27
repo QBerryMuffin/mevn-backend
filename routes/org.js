@@ -3,7 +3,7 @@ const router = express.Router();
 
 const mongo = require('mongodb')
 const MongoClient = mongo.MongoClient
-const uri = 'mongodb+srv://test:test1234@testbug.rhc7n.mongodb.net/test'
+const uri = "mongodb://home-test-mongo:3B21gdHSSxACQMhxsKeEX06XeWjNCQrI9JF0a8NR3AgcdeigU0WsDHm9cbIVUTeZenF1n7d6G8N1UhBLaAKzjg==@home-test-mongo.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&maxIdleTimeMS=120000&appName=@home-test-mongo@"
 const mongoClient = new MongoClient(uri, { reconnectTries : Number.MAX_VALUE, 
                                          autoReconnect : true,
                                          useNewUrlParser : true })
@@ -18,7 +18,7 @@ mongoClient.connect((err, db) => {
 })
 
 router.get('/', (req, res) => {
-    const collection = client.db("test").collection("CUCM")
+    const collection = client.db("mevn-testbed").collection("orgs")
     const query = {"name": "default"}
     collection.find(query).toArray(function (err, results){
         if (err) {
@@ -31,7 +31,7 @@ router.get('/', (req, res) => {
 })
 
 router.get('/byId/:id', (req, res) => {
-    const collection = client.db("test").collection("CUCM")
+    const collection = client.db("mevn-testbed").collection("orgs")
     let id = req.params.id
     const query = {"name": id}
     collection.find(query).toArray(function (err, results){
@@ -46,7 +46,7 @@ router.get('/byId/:id', (req, res) => {
 })
 
 router.get('/getNames', (reg, res) => {
-    const collection = client.db("test").collection("CUCM")
+    const collection = client.db("mevn-testbed").collection("orgs")
     const projection = {name: 1}
     collection.find().project(projection).toArray(function (err, results){
         if (err) {
@@ -60,7 +60,7 @@ router.get('/getNames', (reg, res) => {
     })
 })
  router.post ('/saveOrg', (req, res) => {
-    const collection = client.db("test").collection("CUCM")
+    const collection = client.db("mevn-testbed").collection("orgs")
     const query = { name: req.body.name }
     const updateDoc = {$set: req.body}
       
