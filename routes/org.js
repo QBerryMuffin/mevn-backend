@@ -4,9 +4,8 @@ const router = express.Router();
 const mongo = require('mongodb')
 const MongoClient = mongo.MongoClient
 const uri = process.env.DB_URI
-const mongoClient = new MongoClient(uri, { reconnectTries : Number.MAX_VALUE, 
-                                         autoReconnect : true,
-                                         useNewUrlParser : true })
+const mongoClient = new MongoClient(uri, { useNewUrlParser : true,
+                                         useUnifiedTopology: true  })
 
 var client = {}
 mongoClient.connect((err, db) => {
@@ -32,14 +31,12 @@ router.get('/', (req, res) => {
 
 router.get('/byId/:id', (req, res) => {
     const collection = client.db("mevn-testbed").collection("orgs")
-    let id = req.params.id
-    const query = {"name": id}
-    collection.find(query).toArray(function (err, results){
+    const query = {"orgName": req.params.id}
+    collection.find(query, { _id: 0 }).toArray(function (err, results){
         if (err) {
             console.log(err)
             res.json({'code': 10000, "data": {"error": err}})
         } else {
-            delete results[0]._id
             res.json({"code": 20000, "data": results})
         }
     })
@@ -47,13 +44,13 @@ router.get('/byId/:id', (req, res) => {
 
 router.get('/getNames', (reg, res) => {
     const collection = client.db("mevn-testbed").collection("orgs")
-    const projection = {name: 1}
+    const projection = {orgName: 1, _id: 0}
     collection.find().project(projection).toArray(function (err, results){
         if (err) {
             console.log(err)
             res.json({'code': 10000, "data": {"error": err}})
         }else{
-            const list = results.map(i => i.name)
+            const list = results.map(i => i.orgName)
             res.json({code: 20000, data:{total: list.length, items: list }})
     
         }
@@ -61,7 +58,7 @@ router.get('/getNames', (reg, res) => {
 })
  router.post ('/saveOrg', (req, res) => {
     const collection = client.db("mevn-testbed").collection("orgs")
-    const query = { name: req.body.name }
+    const query = { orgName: req.body.name }
     const updateDoc = {$set: req.body}
       
 

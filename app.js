@@ -10,7 +10,6 @@ const helmet = require('helmet')
 const { raw } = require('body-parser')
 
 var indexRouter = require('./routes/index');
-var orgRouter = require('./routes/org');
 
 const app = express() // create your express app
 
@@ -29,7 +28,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/org', orgRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
